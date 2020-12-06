@@ -13,16 +13,30 @@ fn main() {
 
     for group in groups {
         let mut total_answers = HashSet::new();
+        let mut current_answers = HashSet::new();
         let answers: Vec<&str> = group.lines().collect();
+        let first_answer = answers[0];
+
+        //init
+        for c in first_answer.chars() {
+            total_answers.insert(c);
+        }
+
+        //intesect
         for answer in answers {
+            current_answers.clear();
             for c in answer.chars() {
-                total_answers.insert(c);
-                // do something with `c`
+                current_answers.insert(c);
             }
-            // do something with `c`
+            total_answers = total_answers
+                .iter()
+                .filter(|k| current_answers.contains(k))
+                .map(|&x| x)
+                .collect::<HashSet<char>>();
+            //total_answers.intersection(&current_answers);
         }
         println!(
-            "Found {} disjunct answers in {}",
+            "Found {} same answers in {}",
             total_answers.len(),
             group.replace("\n", "\t")
         );
