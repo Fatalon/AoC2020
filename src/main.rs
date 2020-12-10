@@ -10,37 +10,32 @@ fn main() {
 
     adapters.sort();
 
-    let mut diff_by_1 = 0;
-    let mut diff_by_2 = 0;
-    let mut diff_by_3 = 1; //for the phones own adapter
+    let mut last_value_in_array = *adapters.last().unwrap() + 3;
+    adapters.push(last_value_in_array);
+    println!("last value is {}", last_value_in_array);
+    last_value_in_array += 1;
 
-    let mut last_value = 0;
+    let mut total_paths: Vec<i64> = vec![0; last_value_in_array as usize];
+    total_paths[0] = 1;
 
     for adapter in adapters {
-        let diff = adapter - last_value;
-        last_value = adapter;
-
-        if diff == 1 {
-            diff_by_1 += 1;
-            continue;
+        total_paths[adapter as usize] = 0;
+        for difference in adapter - 3..adapter {
+            println!("test with {}", difference);
+            if difference >= 0 {
+                if total_paths[difference as usize] != 0 {
+                    println!(
+                        "the adapter is {}, the current values in total_paths are {}",
+                        adapter, total_paths[difference as usize]
+                    );
+                    total_paths[adapter as usize] += total_paths[difference as usize];
+                }
+            }
         }
-        if diff == 2 {
-            diff_by_2 += 1;
-            continue;
-        }
-        if diff == 3 {
-            diff_by_3 += 1;
-            continue;
-        }
-        println!(
-            "Found suspecious values, was {}, with diff {}",
-            adapter, diff
-        );
     }
+    last_value_in_array -= 1;
     println!(
-        "Found {} diff 1 and {} diff 3, product is {}",
-        diff_by_1,
-        diff_by_3,
-        diff_by_1 * diff_by_3
+        "number of mutations is really {}",
+        total_paths[last_value_in_array as usize]
     );
 }
