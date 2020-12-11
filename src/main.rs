@@ -3,6 +3,12 @@ use std::fs;
 fn predictRound(waiting_area: Vec<Vec<char>>) -> Vec<Vec<char>> {
     let mut new_waiting_area: Vec<Vec<char>> =
         vec![vec!['.'; waiting_area[0].len()]; waiting_area.len()];
+
+    let mut longest_distance = waiting_area[0].len();
+    if waiting_area.len() > waiting_area[0].len() {
+        longest_distance = waiting_area.len();
+    }
+
     for x in 0..waiting_area.len() {
         let line = waiting_area[x].clone();
         for y in 0..line.len() {
@@ -14,22 +20,157 @@ fn predictRound(waiting_area: Vec<Vec<char>>) -> Vec<Vec<char>> {
                 let signed_x = x as isize;
                 let signed_y = y as isize;
 
-                for neigh_x in signed_x - 1..signed_x + 2 {
-                    if neigh_x < 0 || neigh_x >= waiting_area.len() as isize {
-                        continue;
+                for xy_diagonal_offset in 1..longest_distance {
+                    let neigh_x = signed_x - xy_diagonal_offset as isize;
+                    let neigh_y = signed_y - xy_diagonal_offset as isize;
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
                     }
-                    for neigh_y in signed_y - 1..signed_y + 2 {
-                        if neigh_y < 0 || neigh_y >= line.len() as isize {
-                            continue;
-                        }
-                        if neigh_x == signed_x && neigh_y == signed_y {
-                            continue;
-                        }
-                        if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
-                            counter += 1;
-                        }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
                     }
                 }
+
+                for xy_diagonal_offset in 1..longest_distance {
+                    let neigh_x = signed_x + xy_diagonal_offset as isize;
+                    let neigh_y = signed_y + xy_diagonal_offset as isize;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for xy_diagonal_offset in 1..longest_distance {
+                    let neigh_x = signed_x - xy_diagonal_offset as isize;
+                    let neigh_y = signed_y + xy_diagonal_offset as isize;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for xy_diagonal_offset in 1..longest_distance {
+                    let neigh_x = signed_x + xy_diagonal_offset as isize;
+                    let neigh_y = signed_y - xy_diagonal_offset as isize;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for one_direction_offset in 1..longest_distance {
+                    let neigh_x = signed_x - one_direction_offset as isize;
+                    let neigh_y = y;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for one_direction_offset in 1..longest_distance {
+                    let neigh_x = signed_x + one_direction_offset as isize;
+                    let neigh_y = y;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for one_direction_offset in 1..longest_distance {
+                    let neigh_y = signed_y - one_direction_offset as isize;
+                    let neigh_x = x;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for one_direction_offset in 1..longest_distance {
+                    let neigh_y = signed_y + one_direction_offset as isize;
+                    let neigh_x = x;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
                 if counter == 0 {
                     new_waiting_area[x][y] = '#';
                 } else {
@@ -40,23 +181,157 @@ fn predictRound(waiting_area: Vec<Vec<char>>) -> Vec<Vec<char>> {
                 let signed_x = x as isize;
                 let signed_y = y as isize;
 
-                for neigh_x in signed_x - 1..signed_x + 2 {
-                    if neigh_x < 0 || neigh_x >= waiting_area.len() as isize {
-                        continue;
+                for xy_diagonal_offset in 1..longest_distance {
+                    let neigh_x = signed_x - xy_diagonal_offset as isize;
+                    let neigh_y = signed_y - xy_diagonal_offset as isize;
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
                     }
-                    for neigh_y in signed_y - 1..signed_y + 2 {
-                        if neigh_y < 0 || neigh_y >= line.len() as isize {
-                            continue;
-                        }
-                        if neigh_x == signed_x && neigh_y == signed_y {
-                            continue;
-                        }
-                        if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
-                            counter += 1;
-                        }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
                     }
                 }
-                if counter >= 4 {
+
+                for xy_diagonal_offset in 1..longest_distance {
+                    let neigh_x = signed_x + xy_diagonal_offset as isize;
+                    let neigh_y = signed_y + xy_diagonal_offset as isize;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for xy_diagonal_offset in 1..longest_distance {
+                    let neigh_x = signed_x - xy_diagonal_offset as isize;
+                    let neigh_y = signed_y + xy_diagonal_offset as isize;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for xy_diagonal_offset in 1..longest_distance {
+                    let neigh_x = signed_x + xy_diagonal_offset as isize;
+                    let neigh_y = signed_y - xy_diagonal_offset as isize;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for one_direction_offset in 1..longest_distance {
+                    let neigh_x = signed_x - one_direction_offset as isize;
+                    let neigh_y = y;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for one_direction_offset in 1..longest_distance {
+                    let neigh_x = signed_x + one_direction_offset as isize;
+                    let neigh_y = y;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for one_direction_offset in 1..longest_distance {
+                    let neigh_y = signed_y - one_direction_offset as isize;
+                    let neigh_x = x;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+
+                for one_direction_offset in 1..longest_distance {
+                    let neigh_y = signed_y + one_direction_offset as isize;
+                    let neigh_x = x;
+
+                    if neigh_x < 0
+                        || neigh_x as usize >= waiting_area.len()
+                        || neigh_y < 0
+                        || neigh_y as usize >= waiting_area[0].len()
+                    {
+                        break;
+                    }
+                    if waiting_area[neigh_x as usize][neigh_y as usize] == '#' {
+                        counter += 1;
+                        break;
+                    } else if waiting_area[neigh_x as usize][neigh_y as usize] == 'L' {
+                        break;
+                    }
+                }
+                if counter >= 5 {
                     new_waiting_area[x][y] = 'L';
                 } else {
                     new_waiting_area[x][y] = '#';
@@ -87,7 +362,7 @@ fn check_if_areas_are_equal(
 
 fn main() {
     // --snip
-    let filename = "src/Day11/test.txt";
+    let filename = "src/Day11/input.txt";
     println!("In file {}", filename);
 
     let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
