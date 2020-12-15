@@ -1,73 +1,41 @@
-use std::fs;
+fn solve_both(input: &Vec<usize>, num_iterations: usize) -> usize {
+    const UNSET: usize = std::usize::MAX;
+    let mut last_position = Vec::new();
+    let mut last_last_position = Vec::new();
 
-fn main() {
-    // --snip
-    let filename = "src/Day15/input.txt";
-    println!("In file {}", filename);
+    last_position.resize(num_iterations, UNSET);
+    last_last_position.resize(num_iterations, UNSET);
 
-    let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
-    let values: Vec<i32> = contents.split(",").map(|s| s.parse().unwrap()).collect();
-
-    let mut game: Vec<(i32, usize)> = Vec::new();
-
-    for (i, value) in values.iter().enumerate() {
-        game.push((*value, i + 1));
-    }
-    println!("game has {} entries", game.len());
-
-    let mut last_value = -1;
-    for index in values.len()..30000000 {
-        if index % 10000 == 0 {
-            println!("current index {}", index);
-        }
-        //println!("last value is {}", last_value);
-        //println!("Current game state:");
-        // for entry in game.clone() {
-        //     println!("{} {}", entry.0, entry.1);
-        // }
-        if last_value == -1 {
-            game.push((0, index + 1));
-            last_value = 0;
-            //println!("First iteration, index is currently {}", index);
-            continue;
-        }
-        let mut game_to_check: Vec<(i32, usize)> = game.clone()[0..game.len() - 1].to_vec();
-        game_to_check.reverse();
-        //println!("game to check has length {}", game_to_check.len());
-        // for entry in game_to_check.clone() {
-        //     println!("{} {}", entry.0, entry.1);
-        // }
-
-        let mut last_time_seen = 0;
-        for (i, entry) in game_to_check.iter().enumerate() {
-            if entry.0 == last_value {
-                // println!("found last value in entry {}, {}", entry.0, entry.1);
-                last_time_seen = entry.1;
-                //println!("entry 1 is {}", entry.1);
-                game.remove(
-                    game.iter()
-                        .position(|x| x.1 == entry.1)
-                        .expect("needle not found"),
-                );
-                //game.remove(index - (i + 2));
-                break;
-            }
-        }
-        // value was not present before
-        if last_time_seen == 0 {
-            game.push((0, index + 1));
-            last_value = 0;
-            //println!("last value was first time inserted {}", index);
-            continue;
-        }
-        last_value = (index - last_time_seen) as i32;
-        game.push((last_value, index + 1));
-        //println!("last value was seen at time {} before", last_time_seen);
+    for idx in 0..input.len() {
+        let curr_number = input[idx];
+        last_last_position[curr_number] = last_position[curr_number];
+        last_position[curr_number] = idx;
     }
 
-    for entry in game {
-        println!("{} {}", entry.0, entry.1);
-    }
+    let mut last_spoken = *input.last().unwrap();
+    let mut ctr = input.len();
+    while ctr < num_iterations {
+        let last_last_idx = last_last_position[last_spoken];
 
-    println!("Solution is {}", last_value);
+        if last_last_idx == std::usize::MAX {
+            last_spoken = 0;
+        } else {
+            let last_idx = last_position[last_spoken];
+            last_spoken = last_idx - last_last_idx;
+        }
+
+        last_last_position[last_spoken] = last_position[last_spoken];
+        last_position[last_spoken] = ctr;
+        ctr += 1;
+    }
+    return last_spoken;
+}
+
+pub fn solve() {
+    let input = [12, 1, 16, 3, 11, 0].to_vec();
+    println!("Part one: {}", solve_both(&input, 2020));
+    println!("Part two: {}", solve_both(&input, 30000000));
+}
+pub fn main() {
+    solve();
 }
