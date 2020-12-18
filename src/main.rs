@@ -1,140 +1,113 @@
-use itertools::Itertools;
 use std::fs;
 
-const MAX_SIZE: usize = 30;
-fn predictRound(game: Vec<Vec<Vec<Vec<char>>>>) -> Vec<Vec<Vec<Vec<char>>>> {
-    let mut new_game_state: Vec<Vec<Vec<Vec<char>>>> =
-        vec![vec![vec![vec!['.'; MAX_SIZE]; MAX_SIZE]; MAX_SIZE]; MAX_SIZE];
+fn calculateRecursivly(mut instructions: Vec<&str>) -> i64 {
+    let mut total: i64 = 0;
+    let mut left_value: i64 = 0;
+    let mut operation = 0;
+    let mut current_index = 0;
 
-    let possible_neighbour_values: Vec<isize> = vec![-1, 0, 1, -1, 0, 1, -1, 0, 1, -1, 0, 1];
-    let mut directions = Vec::new();
-    for perm in possible_neighbour_values.iter().permutations(4).unique() {
-        if perm[0] == perm[1] && perm[1] == perm[2] && perm[2] == perm[3] && perm[2] == &0 {
-            continue;
-        }
-        directions.push(perm);
+    for x in instructions.clone() {
+        print!("{} ", x);
     }
-    println!("direction has {} entries", directions.len());
-    for w in 0..game.len() - 1 {
-        let dimension = &game[w];
-        for z in 0..dimension.len() - 1 {
-            let level = dimension[z].clone();
-            for x in 0..level.len() - 1 {
-                let row = &level[x];
-                for y in 0..row.len() - 1 {
-                    let space: char = game[w][z][x][y];
-                    //If a seat is empty (L) and there are no occupied seats adjacent to it, the seat becomes occupied.
-                    if space == '#' {
-                        let mut counter = 0;
+    println!();
 
-                        for direction in directions.clone() {
-                            if w as isize + direction[0] >= 0
-                                && z as isize + direction[1] >= 0
-                                && x as isize + direction[2] >= 0
-                                && y as isize + direction[3] >= 0
-                            {
-                                let neighbour = game[(w as isize + direction[0]) as usize]
-                                    [(z as isize + direction[1]) as usize]
-                                    [(x as isize + direction[2]) as usize]
-                                    [(y as isize + direction[3]) as usize];
-                                if neighbour == '#' {
-                                    counter += 1;
-                                }
-                                if counter > 3 {
-                                    break;
-                                }
+    while current_index < instructions.len() {
+        //println!("got {} at {}", instructions[current_index], current_index);
+        if instructions[current_index].starts_with("(") {
+            let mut parenthesis_ctr = 1;
+            if instructions[current_index].starts_with("((") {
+                parenthesis_ctr = 2;
+            }
+            for end_index in current_index + 1..instructions.len() {
+                if instructions[end_index].starts_with("(") {
+                    parenthesis_ctr += 1;
+                }
+                if instructions[end_index].ends_with(")") {
+                    if instructions[end_index].ends_with("))") {
+                        parenthesis_ctr -= 1;
+                    }
+
+                    if parenthesis_ctr == 1 {
+                        //println!("counter was 1");
+                        let curr: &str = &instructions[current_index][1..];
+                        instructions[current_index] = curr;
+
+                        let end: &str =
+                            &instructions[end_index][0..instructions[end_index].len() - 1];
+                        instructions[end_index] = end;
+                        let result = calculateRecursivly(
+                            instructions[current_index..end_index + 1].to_vec(),
+                        );
+                        //println!("result was {}, operation is {}", result, operation);
+                        if operation > 0 {
+                            if operation == 1 {
+                                total = left_value + result;
+                                //println!("total is now {}", total);
+                                left_value = total;
+                                operation = 0;
+                            } else {
+                                total = left_value * result;
+                                //println!("total is now {}", total);
+                                left_value = total;
+                                operation = 0;
                             }
-                        }
-
-                        if counter == 2 || counter == 3 {
-                            new_game_state[w][z][x][y] = '#';
                         } else {
-                            new_game_state[w][z][x][y] = '.';
+                            left_value = result;
                         }
-                    //game cell is inactive
+                        current_index = end_index;
+                        break;
                     } else {
-                        let mut counter = 0;
-
-                        for direction in directions.clone() {
-                            if w as isize + direction[0] >= 0
-                                && z as isize + direction[1] >= 0
-                                && x as isize + direction[2] >= 0
-                                && y as isize + direction[3] >= 0
-                            {
-                                let neighbour = game[(w as isize + direction[0]) as usize]
-                                    [(z as isize + direction[1]) as usize]
-                                    [(x as isize + direction[2]) as usize]
-                                    [(y as isize + direction[3]) as usize];
-                                if neighbour == '#' {
-                                    counter += 1;
-                                }
-                                if counter > 3 {
-                                    break;
-                                }
-                            }
-                        }
-                        if counter == 3 {
-                            new_game_state[w][z][x][y] = '#';
-                        } else {
-                            new_game_state[w][z][x][y] = '.';
-                        }
+                        //println!("counter was not 1, was {}", parenthesis_ctr);
+                        parenthesis_ctr -= 1;
                     }
                 }
             }
+        } else {
+            if instructions[current_index] == "+" {
+                operation = 1;
+            } else if instructions[current_index] == "*" {
+                operation = 2;
+            //right value
+            // println!(
+            //     "current index is {}, instruction len is {}",
+            //     current_index,
+            //     instructions.len()
+            // );
+            } else if operation > 0 {
+                if operation == 1 {
+                    total = left_value + instructions[current_index].parse::<i64>().unwrap();
+                    //println!("total is now {}", total);
+                    left_value = total;
+                    operation = 0;
+                } else {
+                    total = left_value * instructions[current_index].parse::<i64>().unwrap();
+                    //println!("total is now {}", total);
+                    left_value = total;
+                    operation = 0;
+                }
+            } else {
+                left_value = instructions[current_index].parse::<i64>().unwrap();
+            }
         }
+        current_index += 1;
     }
-    return new_game_state;
+    return total;
 }
 
 fn main() {
     // --snip--
-    let filename = "src/Day17/input.txt";
+    let filename = "src/Day18/test.txt";
     println!("In file {}", filename);
 
     let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
     let lines: Vec<&str> = contents.lines().collect();
 
-    //z,x,y
-    let mut game: Vec<Vec<Vec<Vec<_>>>> =
-        vec![vec![vec![vec!['.'; MAX_SIZE]; MAX_SIZE]; MAX_SIZE]; MAX_SIZE];
-
-    //need to ensure -1,0,1 instead of 0,1,2
-    let offset = MAX_SIZE / 2;
-
-    for (x, line) in lines.iter().enumerate() {
-        for (y, cube) in line.chars().enumerate() {
-            game[offset][offset][x + offset][y + offset] = cube;
-        }
+    let mut result = 0;
+    for line in lines {
+        let instructions: Vec<&str> = line.split_whitespace().collect();
+        let value = calculateRecursivly(instructions);
+        println!("value was {}", value);
+        result += value;
     }
-
-    for round in 0..6 {
-        println!("Round: {}", round);
-
-        //et mut index = -(offset as isize);
-        // for level in game.clone() {
-        //     println!("level {}", index);
-        //     for row in level {
-        //         for c in row {
-        //             print!("{}", c);
-        //         }
-        //         println!();
-        //     }
-        //     index += 1;
-        // }
-        game = predictRound(game.clone());
-    }
-
-    let mut counted_active = 0;
-    for dimension in game.clone() {
-        for level in dimension {
-            for row in level {
-                for c in row {
-                    if c == '#' {
-                        counted_active += 1;
-                    }
-                }
-            }
-        }
-    }
-    println!("counted active was {}", counted_active);
+    println!("result was {}", result);
 }
