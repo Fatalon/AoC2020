@@ -54,16 +54,6 @@ fn main() {
             index,
         ));
     }
-    // println!("Created game input {}, {}", game_input.len(), game_input[5]);
-    // for board in &boards {
-    //     println!("Board with id {}", board.id);
-    //     for x in &board.table {
-    //         for y in x {
-    //             print!("{} ", y);
-    //         }
-    //         println!();
-    //     }
-    // }
     println!("Created boards {}", &boards.len());
     let mut possible_wins: Vec<Vec<u8>> = vec![];
     for board in &boards {
@@ -73,7 +63,6 @@ fn main() {
         for y in 0..board.table.len() {
             let mut v: Vec<u8> = vec![];
             for x in 0..board.table.len() {
-                //println!("board {}", board.table[x][y]);
                 v.push(board.table[x][y]);
             }
             possible_wins.push(v);
@@ -87,17 +76,14 @@ fn main() {
     let mut final_number: u8;
 
     let mut solved_boards: Vec<usize> = vec![];
-    for i in 0..20 {
+    for i in 0..game_input.len() - 5 {
         println!("##########ROUND {} #################", i);
         for (pos, possible_win) in possible_wins.iter().enumerate() {
+            if solved_boards.contains(&(pos / 10)) {
+                continue;
+            }
             let intersect_array = possible_win.intersect(game_input[0..current_index].to_vec());
-            // print!("[ ");
-            // for e in &intersect_array {
-            //     print!("{}, ", e);
-            // }
-            // print!(" ]");
             let size = intersect_array.len();
-            // println!("\t\tsize was {}", size);
             if size == 5 {
                 solution = pos / 10;
                 println!(
@@ -124,11 +110,20 @@ fn main() {
                     total_unmarked,
                     total_unmarked * final_number as u32
                 );
+                for s in &solved_boards {
+                    println!("{}", s);
+                }
+
+                if !solved_boards.contains(&solution) {
+                    if (solved_boards.len() == boards.len() - 1) {
+                        println!("FOUND solution task 2");
+                        return;
+                    } else {
+                        solved_boards.push(solution);
+                    }
+                }
             }
         }
         current_index += 1;
-        if solution != 50000 {
-            break;
-        }
     }
 }
