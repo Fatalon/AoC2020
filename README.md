@@ -1,0 +1,1 @@
+https://www.ericburden.work/categories/advent-of-code-2021/page/3/
